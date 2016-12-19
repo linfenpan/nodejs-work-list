@@ -1,0 +1,37 @@
+{
+  "name": "nodejs-work-list",
+  "version": "1.0.0",
+  "description": "日常工作清单，离线程序",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linfenpan/nodejs-work-list.git"
+  },
+  "keywords": [
+    "离线",
+    "工作清单",
+    "task",
+    "list"
+  ],
+  "author": "da宗熊",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/linfenpan/nodejs-work-list/issues"
+  },
+  "homepage": "https://github.com/linfenpan/nodejs-work-list#readme",
+  "dependencies": {
+    "body-parser": "~1.15.1",
+    "consolidate": "^0.14.5",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.2.0",
+    "express": "^4.14.0",
+    "fs-extra": "^1.0.0",
+    "morgan": "~1.7.0",
+    "nunjucks": "^3.0.0",
+    "serve-favicon": "~2.3.0",
+    "ueditor": "^1.2.0"
+  }
+}
