@@ -24,12 +24,15 @@
   "homepage": "https://github.com/linfenpan/nodejs-work-list#readme",
   "dependencies": {
     "body-parser": "~1.15.1",
+    "co": "^4.6.0",
+    "co-nedb": "^2.0.1",
     "consolidate": "^0.14.5",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
     "express": "^4.14.0",
     "fs-extra": "^1.0.0",
     "morgan": "~1.7.0",
+    "nedb": "^1.8.0",
     "nunjucks": "^3.0.0",
     "serve-favicon": "~2.3.0",
     "ueditor": "^1.2.0"
