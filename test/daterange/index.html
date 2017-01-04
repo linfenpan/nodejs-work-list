@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>日期范围选择</title>
+  <link rel="stylesheet" href="./calendar.css">
+  <script src="./jquery.js"></script>
+  <script src="./moment.js"></script>
+  <script src="./calendar.js"></script>
+</head>
+<body>
+  <div>
+    <label>单个日期</label>
+    <input type="text" id="singleDate">
+  </div>
+
+  <div>
+    <label>日期范围选择</label>
+    <input type="text" id="rangeDate">
+  </div>
+
+  <script type="text/javascript">
+    moment.locale('zh-cn');
+    var singleDate = $('#singleDate').DatePicker({
+      startDate: moment(),
+      minDate: moment().subtract(2, 'week'),
+      maxDate: moment().add(1, 'week')
+    });
+
+    var rangeDate = $('#rangeDate').DatePicker({
+      type: 'rangedate',
+      // modalMode: true,
+      ranges: [
+        {
+          label: '上周',
+          startDate: moment().subtract(7, 'day'),
+          endDate: moment()
+        },
+        {
+          label: '上月',
+          startDate: moment().subtract(1, 'months'),
+          endDate: moment()
+        }
+      ],
+      onShow: function() {},
+      onHide: function() {}
+    });
+  </script>
+</body>
+</html>
