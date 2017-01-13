@@ -3,7 +3,7 @@
 
 .dt.show { width: auto; height: auto; }
 
-.dt.show .dt__wrapper { overflow: inherit; max-width: 600px; max-height: 520px; opacity: 1; display: block; border-radius: 0; }
+.dt.show .dt__wrapper { overflow: inherit; max-width: 600px; max-height: 520px; opacity: 1; display: block; }
 
 .dt.show .dt-modal_wrapper { left: 0; right: 0; top: 0; bottom: 0; }
 
@@ -39,7 +39,7 @@
 
 .dt__nav_title { display: inline-block; }
 
-.dt__wrapper { position: absolute; background-color: #fff; top: 50px; left: 0; z-index: 100; transition: all 0.3s ease; opacity: 0.5; max-height: 0px; max-width: 0px; overflow: hidden; border-radius: 30%; box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.15); }
+.dt__wrapper { position: absolute; background-color: #fff; top: 50px; left: 0; z-index: 100; transition: all 0.3s ease; opacity: 0.5; max-height: 0px; overflow: hidden; box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.15); }
 
 .dt__wrapper.rangedate { min-width: 571px; }
 
