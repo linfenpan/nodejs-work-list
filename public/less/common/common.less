@@ -1,0 +1,45 @@
+// main: ../index.less, autoprefixer: true
+@padding1: 10px;
+@padding2: 20px;
+@colorRed: #ef3535;
+@colorBlue: #17aae4;
+@colorLightBorder: #ddd;
+
+* { padding: 0; margin: 0; box-sizing: border-box; }
+body,html { height: 100%; width: 100%; font-family: "微软雅黑"; font-size: 14px; line-height: 1.5; }
+a, a:hover { text-decoration: none; }
+a:hover { opacity: .9; }
+input,textarea { border: none; resize: none; font-family: "微软雅黑"; }
+.b { font-weight: bold; }
+.btn { border: 1px solid @colorLightBorder; border-radius: 4px; padding: @padding1/2 @padding1; box-shadow: 0 0 1px #ddd; transition: all .3s ease; }
+.redBtn { background: @colorRed; color: #fff; }
+.blueBtn { background: @colorBlue; color: #fff; }
+
+#main { height: 100%; display: flex; flex-direction: row; align-items: stretch; }
+#sidebar {
+  position: relative; width: 180px; display: flex; flex-direction: column; align-items: stretch;
+  border-right: 1px solid #ddd;
+
+  input.title { padding: @padding1 0; font-size: 18px; text-align: center; background: #222; color: #4e7cad; }
+  input.title::-webkit-input-placeholder { font-size: 18px; color: #4e7cad; }
+  .main { flex: 1; overflow: auto; }
+  .addItem {
+    display: block; padding: @padding1 0; font-size: 16px; text-align: center;
+    color: #fff;
+    background-image: linear-gradient(180deg, #187CDE, #005ebb, #187CDE);
+    transition: all .3s ease;
+  }
+
+  .workList {
+    li { position: relative; padding: 0 0 @padding1 0; margin-top: @padding1/2; width: 100%; border-bottom: 1px solid @colorLightBorder; }
+    li:first-child { margin-top: 0; }
+    .text { padding: @padding1/2 0; word-break: break-all; }
+    .time { font-size: 12px; color: #666; }
+    .opers {
+      font-size: 12px;
+      padding: @padding1/2 2px;
+      background: #ddd;
+      .btn { display: inline-block; padding: 2px @padding1; }
+    }
+  }
+}

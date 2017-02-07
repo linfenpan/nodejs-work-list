@@ -1,0 +1,135 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+body,
+html {
+  height: 100%;
+  width: 100%;
+  font-family: "微软雅黑";
+  font-size: 14px;
+  line-height: 1.5;
+}
+a,
+a:hover {
+  text-decoration: none;
+}
+a:hover {
+  opacity: .9;
+}
+input,
+textarea {
+  border: none;
+  resize: none;
+  font-family: "微软雅黑";
+}
+.b {
+  font-weight: bold;
+}
+.btn {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  box-shadow: 0 0 1px #ddd;
+  -webkit-transition: all .3s ease;
+  transition: all .3s ease;
+}
+.redBtn {
+  background: #ef3535;
+  color: #fff;
+}
+.blueBtn {
+  background: #17aae4;
+  color: #fff;
+}
+#main {
+  height: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+}
+#sidebar {
+  position: relative;
+  width: 180px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  border-right: 1px solid #ddd;
+}
+#sidebar input.title {
+  padding: 10px 0;
+  font-size: 18px;
+  text-align: center;
+  background: #222;
+  color: #4e7cad;
+}
+#sidebar input.title::-webkit-input-placeholder {
+  font-size: 18px;
+  color: #4e7cad;
+}
+#sidebar .main {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  overflow: auto;
+}
+#sidebar .addItem {
+  display: block;
+  padding: 10px 0;
+  font-size: 16px;
+  text-align: center;
+  color: #fff;
+  background-image: -webkit-linear-gradient(top, #187CDE, #005ebb, #187CDE);
+  background-image: linear-gradient(180deg, #187CDE, #005ebb, #187CDE);
+  -webkit-transition: all .3s ease;
+  transition: all .3s ease;
+}
+#sidebar .workList li {
+  position: relative;
+  padding: 0 0 10px 0;
+  margin-top: 5px;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}
+#sidebar .workList li:first-child {
+  margin-top: 0;
+}
+#sidebar .workList .text {
+  padding: 5px 0;
+  word-break: break-all;
+}
+#sidebar .workList .time {
+  font-size: 12px;
+  color: #666;
+}
+#sidebar .workList .opers {
+  font-size: 12px;
+  padding: 5px 2px;
+  background: #ddd;
+}
+#sidebar .workList .opers .btn {
+  display: inline-block;
+  padding: 2px 10px;
+}
