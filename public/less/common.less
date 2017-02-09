@@ -1,9 +1,5 @@
-// main: ../index.less, autoprefixer: true
-@padding1: 10px;
-@padding2: 20px;
-@colorRed: #ef3535;
-@colorBlue: #17aae4;
-@colorLightBorder: #ddd;
+// out: ../css/common.css, autoprefixer: true
+@import "./common/var.less";
 
 * { padding: 0; margin: 0; box-sizing: border-box; }
 body,html { height: 100%; width: 100%; font-family: "微软雅黑"; font-size: 14px; line-height: 1.5; }
@@ -22,7 +18,7 @@ input,textarea { border: none; resize: none; font-family: "微软雅黑"; }
 
   input.title { padding: @padding1 0; font-size: 18px; text-align: center; background: #222; color: #4e7cad; }
   input.title::-webkit-input-placeholder { font-size: 18px; color: #4e7cad; }
-  .main { flex: 1; overflow: auto; }
+  .main { flex: 1; overflow: auto; background: #f2f2f2; }
   .addItem {
     display: block; padding: @padding1 0; font-size: 16px; text-align: center;
     color: #fff;
@@ -31,15 +27,15 @@ input,textarea { border: none; resize: none; font-family: "微软雅黑"; }
   }
 
   .workList {
-    li { position: relative; padding: 0 0 @padding1 0; margin-top: @padding1/2; width: 100%; border-bottom: 1px solid @colorLightBorder; }
+    li { position: relative; width: 100%; padding: 0 @padding1/2; margin-top: @padding1; box-shadow: 0 0 2px @colorLightBorder; background: #fff; }
     li:first-child { margin-top: 0; }
-    .text { padding: @padding1/2 0; word-break: break-all; }
-    .time { font-size: 12px; color: #666; }
+    .text { padding: @padding1 0; word-break: break-all; }
     .opers {
+      text-align: right;
       font-size: 12px;
       padding: @padding1/2 2px;
-      background: #ddd;
       .btn { display: inline-block; padding: 2px @padding1; }
     }
+    a { color: @colorOrange; }
   }
 }

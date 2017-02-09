@@ -25,6 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 首页
 app.use('/', require('./routes/index'));
+// 项目管理
+app.use('/project', require('./routes/project'));
 // 编辑器上传
 app.use('/ueditor', require('./routes/ueditor'));
 

@@ -31,10 +31,16 @@
     "debug": "~2.2.0",
     "express": "^4.14.0",
     "fs-extra": "^1.0.0",
+    "install": "^0.8.7",
+    "moment": "^2.17.1",
     "morgan": "~1.7.0",
     "nedb": "^1.8.0",
+    "npm": "^4.1.2",
     "nunjucks": "^3.0.0",
+    "pipe-valid": "^2.0.1",
+    "require-dir": "^0.3.1",
     "serve-favicon": "~2.3.0",
+    "thenablejs": "0.0.2",
     "ueditor": "^1.2.0"
   }
 }
