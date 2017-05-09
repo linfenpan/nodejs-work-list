@@ -281,6 +281,7 @@
 +function ($) {
   "use strict";
     var _modalTemplateTempDiv = document.createElement('div');
+    var EVENTS = { CONFIRM: 'confirm', CANCEL: 'cancel' };
 
     $.modalStack = [];
     var t7 = $.Template7;
@@ -298,19 +299,19 @@
         //     modalHTML = $._compiledTemplates.modal(params);
         // }
         // else {
-            var buttonsHTML = '';
-            if (params.buttons && params.buttons.length > 0) {
-                for (var i = 0; i < params.buttons.length; i++) {
-                    buttonsHTML += '<span class="modal-button' + (params.buttons[i].bold ? ' modal-button-bold' : '') + '">' + params.buttons[i].text + '</span>';
-                }
-            }
-            var titleHTML = params.title ? '<div class="modal-title">' + params.title + '</div>' : '';
-            var textHTML = params.text ? '<div class="modal-text">' + params.text + '</div>' : '';
-            var afterTextHTML = params.afterText ? params.afterText : '';
-            var className = params.className ? params.className + ' ' : '';
-            var noButtons = !params.buttons || params.buttons.length === 0 ? 'modal-no-buttons' : '';
-            var verticalButtons = params.verticalButtons ? 'modal-buttons-vertical' : '';
-            modalHTML = '<div class="modal ' + className + noButtons + '"><div class="modal-inner">' + (titleHTML + textHTML + afterTextHTML) + '</div><div class="modal-buttons ' + verticalButtons + '">' + buttonsHTML + '</div></div>';
+        var buttonsHTML = '';
+        if (params.buttons && params.buttons.length > 0) {
+          for (var i = 0; i < params.buttons.length; i++) {
+            buttonsHTML += '<span class="modal-button' + (params.buttons[i].bold ? ' modal-button-bold' : '') + '">' + params.buttons[i].text + '</span>';
+          }
+        }
+        var titleHTML = params.title ? '<div class="modal-title">' + params.title + '</div>' : '';
+        var textHTML = params.text ? '<div class="modal-text">' + params.text + '</div>' : '';
+        var afterTextHTML = params.afterText ? params.afterText : '';
+        var className = params.className ? params.className + ' ' : '';
+        var noButtons = !params.buttons || params.buttons.length === 0 ? 'modal-no-buttons' : '';
+        var verticalButtons = params.verticalButtons ? 'modal-buttons-vertical' : '';
+        modalHTML = '<div class="modal ' + className + noButtons + '"><div class="modal-inner">' + (titleHTML + textHTML + afterTextHTML) + '</div><div class="modal-buttons ' + verticalButtons + '">' + buttonsHTML + '</div></div>';
         // }
 
         _modalTemplateTempDiv.innerHTML = modalHTML;
@@ -321,64 +322,71 @@
 
         // Add events on buttons
         modal.find('.modal-button').each(function (index, el) {
-            $(el).on('click', function (e) {
-                if (params.buttons[index].close !== false) $.closeModal(modal);
-                if (params.buttons[index].onClick) params.buttons[index].onClick(modal, e);
-                if (params.onClick) params.onClick(modal, index);
-            });
+          $(el).on('click', function (e) {
+            if (params.buttons[index].close !== false) $.closeModal(modal);
+            if (params.buttons[index].onClick) params.buttons[index].onClick(modal, e);
+            if (params.buttons[index].event) modal.trigger(params.buttons[index].event, [modal]);
+            if (params.onClick) params.onClick(modal, index);
+          });
         });
         $.openModal(modal);
-        return modal[0];
+        return modal;
     };
     $.alert = function (text, title, callbackOk) {
         if (typeof title === 'function') {
-            callbackOk = arguments[1];
-            title = undefined;
+          callbackOk = arguments[1];
+          title = undefined;
         }
         return $.modal({
-            text: text || '',
-            title: typeof title === 'undefined' ? defaults.modalTitle : title,
-            buttons: [ {text: defaults.modalButtonOk, bold: true, onClick: callbackOk} ]
+          text: text || '',
+          title: typeof title === 'undefined' ? defaults.modalTitle : title,
+          buttons: [ {text: defaults.modalButtonOk, bold: true, event: EVENTS.CONFIRM, onClick: callbackOk} ]
         });
     };
     $.confirm = function (text, title, callbackOk, callbackCancel) {
         if (typeof title === 'function') {
-            callbackCancel = arguments[2];
-            callbackOk = arguments[1];
-            title = undefined;
+          callbackCancel = arguments[2];
+          callbackOk = arguments[1];
+          title = undefined;
         }
         return $.modal({
-            text: text || '',
-            title: typeof title === 'undefined' ? defaults.modalTitle : title,
-            buttons: [
-                {text: defaults.modalButtonCancel, onClick: callbackCancel},
-                {text: defaults.modalButtonOk, bold: true, onClick: callbackOk}
-            ]
+          text: text || '',
+          title: typeof title === 'undefined' ? defaults.modalTitle : title,
+          buttons: [
+            {text: defaults.modalButtonCancel, onClick: callbackCancel, event: EVENTS.CANCEL},
+            {text: defaults.modalButtonOk, bold: true, onClick: callbackOk, event: EVENTS.CONFIRM}
+          ]
         });
     };
     $.prompt = function (text, title, callbackOk, callbackCancel) {
         if (typeof title === 'function') {
-            callbackCancel = arguments[2];
-            callbackOk = arguments[1];
-            title = undefined;
+          callbackCancel = arguments[2];
+          callbackOk = arguments[1];
+          title = undefined;
         }
         return $.modal({
-            text: text || '',
-            title: typeof title === 'undefined' ? defaults.modalTitle : title,
-            afterText: '<input type="text" class="modal-text-input">',
-            buttons: [
-                {
-                    text: defaults.modalButtonCancel
-                },
-                {
-                    text: defaults.modalButtonOk,
-                    bold: true
-                }
-            ],
-            onClick: function (modal, index) {
-                if (index === 0 && callbackCancel) callbackCancel($(modal).find('.modal-text-input').val());
-                if (index === 1 && callbackOk) callbackOk($(modal).find('.modal-text-input').val());
-            }
+          text: text || '',
+          title: typeof title === 'undefined' ? defaults.modalTitle : title,
+          afterText: '<input type="text" class="modal-text-input">',
+          buttons: [
+            { text: defaults.modalButtonCancel },
+            { text: defaults.modalButtonOk, bold: true }
+          ],
+          onClick: function (modal, index) {
+          var _event = '';
+          var $modal = $(modal);
+          var value = $modal.find('.modal-text-input').val();
+
+          if (index === 0) {
+            callbackCancel && callbackCancel(value);
+            _event = EVENTS.CANCEL;
+          }
+          if (index === 1) {
+            callbackOk && callbackOk(value);
+            _event = EVENTS.CONFIRM;
+          }
+          _event && $modal.trigger(_event, [modal, value]);
+          }
         });
     };
     // $.modalLogin = function (text, title, callbackOk, callbackCancel) {
@@ -435,19 +443,19 @@
     //     });
     // };
     $.showPreloader = function (title) {
-        return $.modal({
-            title: title || defaults.modalPreloaderTitle,
-            text: '<div class="preloader"></div>'
-        });
+      return $.modal({
+        title: title || defaults.modalPreloaderTitle,
+        text: '<div class="preloader"></div>'
+      });
     };
     $.hidePreloader = function () {
-        $.closeModal('.modal.modal-in');
+      $.closeModal('.modal.modal-in');
     };
     $.showIndicator = function () {
-        $(defaults.modalContainer).append('<div class="preloader-indicator-overlay"></div><div class="preloader-indicator-modal"><span class="preloader preloader-white"></span></div>');
+      $(defaults.modalContainer).append('<div class="preloader-indicator-overlay"></div><div class="preloader-indicator-modal"><span class="preloader preloader-white"></span></div>');
     };
     $.hideIndicator = function () {
-        $('.preloader-indicator-overlay, .preloader-indicator-modal').remove();
+      $('.preloader-indicator-overlay, .preloader-indicator-modal').remove();
     };
     // // Action Sheet
     // $.actions = function (target, params) {
@@ -901,6 +909,8 @@
       popupCloseByOutside: true,
       closePrevious: true  //close all previous modal before open
     };
+
+    // TODO 添加 options 参数，控制点击空白关闭弹窗这些参数
 
     $(function() {
       $(document).on('click', ' .modal-overlay, .popup-overlay, .close-popup, .open-popup, .open-popover, .close-popover, .close-picker', handleClicks);

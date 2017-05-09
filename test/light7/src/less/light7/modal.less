@@ -1,7 +1,7 @@
 @import url('./variables.less');
 @import url('./mixins.less');
 /* === Modals === */
-@scale: 20px;
+// @scale: 20px; 由 less 的 globalVars 配置
 @modalBgColor:#e8e8e8;
 @modalButonColor : #0894ec;
 @modalButonBg: @modalBgColor;
@@ -437,7 +437,6 @@ input.modal-text-input {
 
 
 //toast
-
 .toast {
   background: rgba(0, 0, 0, .8);
   border-radius: 1 * @scale;
@@ -448,3 +447,6 @@ input.modal-text-input {
   font-size: 0.8 * @scale;
   width: auto;
 }
+
+// preloader
+@import "./preloader.less";

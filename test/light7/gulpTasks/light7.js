@@ -54,7 +54,12 @@ function compressLight7() {
 
 // 编译 less 文件
 const lessCompile = lazypipe()
-  .pipe(less)
+  .pipe(less, {
+    // @see http://www.lesscss.net/
+    globalVars: {
+      scale: '1rem'
+    }
+  })
   .pipe(autoprefixer, {
     browsers: config.autoprefixerBrowsers
   })
