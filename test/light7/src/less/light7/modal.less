@@ -30,6 +30,9 @@
         opacity: 1;
     }
 }
+.preloader-indicator-overlay {
+  z-index: 12000;
+}
 .popup-overlay {
     z-index: 10200;
 }
@@ -44,10 +47,13 @@
     text-align: center;
     border-radius: 0.35 * @scale;
     opacity: 0;
-    transform: translate3d(0,0,0) scale(1.185);
+    transform: translate3d(0,0,0);
     transition-property: transform, opacity;
     color: @color-text;
     display: none;
+    &.modal-ready {
+       transform: translate3d(0,0,0) scale(1.185);
+    }
     &.modal-in {
         opacity: 1;
         transition-duration: @modalDuration;
@@ -426,12 +432,66 @@ input.modal-text-input {
     margin-left: -1.25 * @scale;
     margin-top: -1.25 * @scale;
     background: rgba(0,0,0,0.8);
-    z-index: 11000;
+    z-index: 12000;
     border-radius: 0.25 * @scale;
     .preloader {
         display: block;
         width: 1.7 * @scale;
         height: 1.7 * @scale;
+    }
+}
+
+// Picker Modal
+.picker-modal {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 13rem;
+    z-index: 11500;
+    display: none;
+    transition-property: transform;
+    background: #cfd5da;
+    transform: translate3d( 0,100%,0);
+    &.modal-in, &.modal-out {
+        transition-duration: 400ms;
+    }
+    &.modal-in {
+        transform: translate3d(0,0,0);
+    }
+    &.modal-out {
+        transform: translate3d(0,100%,0);
+    }
+    .picker-modal-inner {
+        height: 100%;
+        position: relative;
+    }
+    .toolbar {
+        .hairline(top, @color-text-gray);
+        position: relative;
+        width: 100%;
+        + .picker-modal-inner {
+            height: ~"-webkit-calc(100% - 2.2rem)";
+            height: ~"-moz-calc(100% - 2.2rem)";
+            height: ~"calc(100% - 2.2rem)";
+        }
+    }
+    &.picker-modal-inline, .popover & {
+        display: block;
+        position: relative;
+        background: none;
+        z-index: inherit;
+        transform: translate3d(0,0,0);
+        .toolbar {
+            .hairline-remove(top);
+            .hairline(bottom, @color-text-gray);
+        }
+    }
+    .popover & {
+        width: auto;
+        .toolbar {
+            background: none;
+        }
     }
 }
 
@@ -448,5 +508,5 @@ input.modal-text-input {
   width: auto;
 }
 
-// preloader
 @import "./preloader.less";
+@import "./picker.less";

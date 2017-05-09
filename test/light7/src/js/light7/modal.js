@@ -7,23 +7,11 @@
   "use strict";
     var _modalTemplateTempDiv = document.createElement('div');
     var EVENTS = { CONFIRM: 'confirm', CANCEL: 'cancel' };
+    var KEY_MODAL_OPTIONS = 'modal-options';
 
-    $.modalStack = [];
-    var t7 = $.Template7;
-
-    $.modalStackClearQueue = function () {
-        if ($.modalStack.length) {
-            ($.modalStack.shift())();
-        }
-    };
     $.modal = function (params) {
         params = params || {};
         var modalHTML = '';
-        // if (defaults.modalTemplate) {
-        //     if (!$._compiledTemplates.modal) $._compiledTemplates.modal = t7.compile(defaults.modalTemplate);
-        //     modalHTML = $._compiledTemplates.modal(params);
-        // }
-        // else {
         var buttonsHTML = '';
         if (params.buttons && params.buttons.length > 0) {
           for (var i = 0; i < params.buttons.length; i++) {
@@ -37,7 +25,6 @@
         var noButtons = !params.buttons || params.buttons.length === 0 ? 'modal-no-buttons' : '';
         var verticalButtons = params.verticalButtons ? 'modal-buttons-vertical' : '';
         modalHTML = '<div class="modal ' + className + noButtons + '"><div class="modal-inner">' + (titleHTML + textHTML + afterTextHTML) + '</div><div class="modal-buttons ' + verticalButtons + '">' + buttonsHTML + '</div></div>';
-        // }
 
         _modalTemplateTempDiv.innerHTML = modalHTML;
 
@@ -54,9 +41,22 @@
             if (params.onClick) params.onClick(modal, index);
           });
         });
-        $.openModal(modal);
+
+        // 给 modal 额外方法，用于设置参数，用法: $.modal(dom).options({ closeEvent: 'confirm' }) 之类的
+        modal.options = function(opts) {
+          var defOpts = this.data(KEY_MODAL_OPTIONS);
+          this.data(KEY_MODAL_OPTIONS, $.extend(defOpts, opts || {}));
+          return this;
+        };
+
+        // 让 modal.options 充分执行
+        setTimeout(function() {
+          $.openModal(modal);
+        });
+
         return modal;
     };
+
     $.alert = function (text, title, callbackOk) {
         if (typeof title === 'function') {
           callbackOk = arguments[1];
@@ -68,6 +68,7 @@
           buttons: [ {text: defaults.modalButtonOk, bold: true, event: EVENTS.CONFIRM, onClick: callbackOk} ]
         });
     };
+
     $.confirm = function (text, title, callbackOk, callbackCancel) {
         if (typeof title === 'function') {
           callbackCancel = arguments[2];
@@ -83,6 +84,7 @@
           ]
         });
     };
+
     $.prompt = function (text, title, callbackOk, callbackCancel) {
         if (typeof title === 'function') {
           callbackCancel = arguments[2];
@@ -98,189 +100,42 @@
             { text: defaults.modalButtonOk, bold: true }
           ],
           onClick: function (modal, index) {
-          var _event = '';
-          var $modal = $(modal);
-          var value = $modal.find('.modal-text-input').val();
+            var _event = '';
+            var $modal = $(modal);
+            var value = $modal.find('.modal-text-input').val();
 
-          if (index === 0) {
-            callbackCancel && callbackCancel(value);
-            _event = EVENTS.CANCEL;
-          }
-          if (index === 1) {
-            callbackOk && callbackOk(value);
-            _event = EVENTS.CONFIRM;
-          }
-          _event && $modal.trigger(_event, [modal, value]);
+            if (index === 0) {
+              callbackCancel && callbackCancel(value);
+              _event = EVENTS.CANCEL;
+            }
+            if (index === 1) {
+              callbackOk && callbackOk(value);
+              _event = EVENTS.CONFIRM;
+            }
+            _event && $modal.trigger(_event, [modal, value]);
           }
         });
     };
-    // $.modalLogin = function (text, title, callbackOk, callbackCancel) {
-    //     if (typeof title === 'function') {
-    //         callbackCancel = arguments[2];
-    //         callbackOk = arguments[1];
-    //         title = undefined;
-    //     }
-    //     return $.modal({
-    //         text: text || '',
-    //         title: typeof title === 'undefined' ? defaults.modalTitle : title,
-    //         afterText: '<input type="text" name="modal-username" placeholder="' + defaults.modalUsernamePlaceholder + '" class="modal-text-input modal-text-input-double"><input type="password" name="modal-password" placeholder="' + defaults.modalPasswordPlaceholder + '" class="modal-text-input modal-text-input-double">',
-    //         buttons: [
-    //             {
-    //                 text: defaults.modalButtonCancel
-    //             },
-    //             {
-    //                 text: defaults.modalButtonOk,
-    //                 bold: true
-    //             }
-    //         ],
-    //         onClick: function (modal, index) {
-    //             var username = $(modal).find('.modal-text-input[name="modal-username"]').val();
-    //             var password = $(modal).find('.modal-text-input[name="modal-password"]').val();
-    //             if (index === 0 && callbackCancel) callbackCancel(username, password);
-    //             if (index === 1 && callbackOk) callbackOk(username, password);
-    //         }
-    //     });
-    // };
-    // $.modalPassword = function (text, title, callbackOk, callbackCancel) {
-    //     if (typeof title === 'function') {
-    //         callbackCancel = arguments[2];
-    //         callbackOk = arguments[1];
-    //         title = undefined;
-    //     }
-    //     return $.modal({
-    //         text: text || '',
-    //         title: typeof title === 'undefined' ? defaults.modalTitle : title,
-    //         afterText: '<input type="password" name="modal-password" placeholder="' + defaults.modalPasswordPlaceholder + '" class="modal-text-input">',
-    //         buttons: [
-    //             {
-    //                 text: defaults.modalButtonCancel
-    //             },
-    //             {
-    //                 text: defaults.modalButtonOk,
-    //                 bold: true
-    //             }
-    //         ],
-    //         onClick: function (modal, index) {
-    //             var password = $(modal).find('.modal-text-input[name="modal-password"]').val();
-    //             if (index === 0 && callbackCancel) callbackCancel(password);
-    //             if (index === 1 && callbackOk) callbackOk(password);
-    //         }
-    //     });
-    // };
+
     $.showPreloader = function (title) {
       return $.modal({
         title: title || defaults.modalPreloaderTitle,
         text: '<div class="preloader"></div>'
       });
     };
+
     $.hidePreloader = function () {
       $.closeModal('.modal.modal-in');
     };
+
     $.showIndicator = function () {
       $(defaults.modalContainer).append('<div class="preloader-indicator-overlay"></div><div class="preloader-indicator-modal"><span class="preloader preloader-white"></span></div>');
     };
+
     $.hideIndicator = function () {
       $('.preloader-indicator-overlay, .preloader-indicator-modal').remove();
     };
-    // // Action Sheet
-    // $.actions = function (target, params) {
-    //     var toPopover = false, modal, groupSelector, buttonSelector;
-    //     if (arguments.length === 1) {
-    //         // Actions
-    //         params = target;
-    //     }
-    //     else {
-    //         // Popover
-    //         if ($.device.ios) {
-    //             if ($.device.ipad) toPopover = true;
-    //         }
-    //         else {
-    //             if ($(window).width() >= 768) toPopover = true;
-    //         }
-    //     }
-    //     params = params || [];
-    //
-    //     if (params.length > 0 && !$.isArray(params[0])) {
-    //         params = [params];
-    //     }
-    //     var modalHTML;
-    //     if (toPopover) {
-    //         var actionsToPopoverTemplate = defaults.modalActionsToPopoverTemplate ||
-    //             '<div class="popover actions-popover">' +
-    //               '<div class="popover-inner">' +
-    //                 '{{#each this}}' +
-    //                 '<div class="list-block">' +
-    //                   '<ul>' +
-    //                     '{{#each this}}' +
-    //                     '{{#if label}}' +
-    //                     '<li class="actions-popover-label {{#if color}}color-{{color}}{{/if}} {{#if bold}}actions-popover-bold{{/if}}">{{text}}</li>' +
-    //                     '{{else}}' +
-    //                     '<li><a href="#" class="item-link list-button {{#if color}}color-{{color}}{{/if}} {{#if bg}}bg-{{bg}}{{/if}} {{#if bold}}actions-popover-bold{{/if}} {{#if disabled}}disabled{{/if}}">{{text}}</a></li>' +
-    //                     '{{/if}}' +
-    //                     '{{/each}}' +
-    //                   '</ul>' +
-    //                 '</div>' +
-    //                 '{{/each}}' +
-    //               '</div>' +
-    //             '</div>';
-    //         if (!$._compiledTemplates.actionsToPopover) {
-    //             $._compiledTemplates.actionsToPopover = t7.compile(actionsToPopoverTemplate);
-    //         }
-    //         var popoverHTML = $._compiledTemplates.actionsToPopover(params);
-    //         modal = $($.popover(popoverHTML, target, true));
-    //         groupSelector = '.list-block ul';
-    //         buttonSelector = '.list-button';
-    //     }
-    //     else {
-    //         if (defaults.modalActionsTemplate) {
-    //             if (!$._compiledTemplates.actions) $._compiledTemplates.actions = t7.compile(defaults.modalActionsTemplate);
-    //             modalHTML = $._compiledTemplates.actions(params);
-    //         }
-    //         else {
-    //             var buttonsHTML = '';
-    //             for (var i = 0; i < params.length; i++) {
-    //                 for (var j = 0; j < params[i].length; j++) {
-    //                     if (j === 0) buttonsHTML += '<div class="actions-modal-group">';
-    //                     var button = params[i][j];
-    //                     var buttonClass = button.label ? 'actions-modal-label' : 'actions-modal-button';
-    //                     if (button.bold) buttonClass += ' actions-modal-button-bold';
-    //                     if (button.color) buttonClass += ' color-' + button.color;
-    //                     if (button.bg) buttonClass += ' bg-' + button.bg;
-    //                     if (button.disabled) buttonClass += ' disabled';
-    //                     buttonsHTML += '<span class="' + buttonClass + '">' + button.text + '</span>';
-    //                     if (j === params[i].length - 1) buttonsHTML += '</div>';
-    //                 }
-    //             }
-    //             modalHTML = '<div class="actions-modal">' + buttonsHTML + '</div>';
-    //         }
-    //         _modalTemplateTempDiv.innerHTML = modalHTML;
-    //         modal = $(_modalTemplateTempDiv).children();
-    //         $(defaults.modalContainer).append(modal[0]);
-    //         groupSelector = '.actions-modal-group';
-    //         buttonSelector = '.actions-modal-button';
-    //     }
-    //
-    //     var groups = modal.find(groupSelector);
-    //     groups.each(function (index, el) {
-    //         var groupIndex = index;
-    //         $(el).children().each(function (index, el) {
-    //             var buttonIndex = index;
-    //             var buttonParams = params[groupIndex][buttonIndex];
-    //             var clickTarget;
-    //             if (!toPopover && $(el).is(buttonSelector)) clickTarget = $(el);
-    //             if (toPopover && $(el).find(buttonSelector).length > 0) clickTarget = $(el).find(buttonSelector);
-    //
-    //             if (clickTarget) {
-    //                 clickTarget.on('click', function (e) {
-    //                     if (buttonParams.close !== false) $.closeModal(modal);
-    //                     if (buttonParams.onClick) buttonParams.onClick(modal, e);
-    //                 });
-    //             }
-    //         });
-    //     });
-    //     if (!toPopover) $.openModal(modal);
-    //     return modal[0];
-    // };
+
     $.popover = function (modal, target, removeOnClose) {
         if (typeof removeOnClose === 'undefined') removeOnClose = true;
         if (typeof modal === 'string' && modal.indexOf('<') >= 0) {
@@ -395,6 +250,7 @@
         $.openModal(modal);
         return modal[0];
     };
+
     $.popup = function (modal, removeOnClose) {
         if (typeof removeOnClose === 'undefined') removeOnClose = true;
         if (typeof modal === 'string' && modal.indexOf('<') >= 0) {
@@ -417,33 +273,7 @@
 
         return modal[0];
     };
-    // $.pickerModal = function (pickerModal, removeOnClose) {
-    //     if (typeof removeOnClose === 'undefined') removeOnClose = true;
-    //     if (typeof pickerModal === 'string' && pickerModal.indexOf('<') >= 0) {
-    //         pickerModal = $(pickerModal);
-    //         if (pickerModal.length > 0) {
-    //             if (removeOnClose) pickerModal.addClass('remove-on-close');
-    //             $(defaults.modalContainer).append(pickerModal[0]);
-    //         }
-    //         else return false; //nothing found
-    //     }
-    //     pickerModal = $(pickerModal);
-    //     if (pickerModal.length === 0) return false;
-    //     pickerModal.show();
-    //     $.openModal(pickerModal);
-    //     return pickerModal[0];
-    // };
-    // $.loginScreen = function (modal) {
-    //     if (!modal) modal = '.login-screen';
-    //     modal = $(modal);
-    //     if (modal.length === 0) return false;
-    //     modal.show();
-    //     if (modal.find('.' + defaults.viewClass).length > 0) {
-    //         $.sizeNavbars(modal.find('.' + defaults.viewClass)[0]);
-    //     }
-    //     $.openModal(modal);
-    //     return modal[0];
-    // };
+
     //显示一个消息，会在2秒钟后自动消失
     $.toast = function(msg, time) {
       var $toast = $("<div class='modal toast'>"+msg+"</div>").appendTo(document.body);
@@ -452,16 +282,28 @@
         $.closeModal($toast);
       }, time || 2000);
     };
+
+    $.pickerModal = function (pickerModal, removeOnClose) {
+        if (typeof removeOnClose === 'undefined') removeOnClose = true;
+        if (typeof pickerModal === 'string' && pickerModal.indexOf('<') >= 0) {
+            pickerModal = $(pickerModal);
+            if (pickerModal.length > 0) {
+                if (removeOnClose) pickerModal.addClass('remove-on-close');
+                $(defaults.modalContainer).append(pickerModal[0]);
+            }
+            else return false; //nothing found
+        }
+        pickerModal = $(pickerModal);
+        if (pickerModal.length === 0) return false;
+        pickerModal.show();
+        $.openModal(pickerModal);
+        return pickerModal[0];
+    };
+
     $.openModal = function (modal) {
         if(defaults.closePrevious) $.closeModal();
         modal = $(modal);
         var isModal = modal.hasClass('modal');
-        if ($('.modal.modal-in:not(.modal-out)').length && defaults.modalStack && isModal) {
-            $.modalStack.push(function () {
-                $.openModal(modal);
-            });
-            return;
-        }
         var isPopover = modal.hasClass('popover');
         var isPopup = modal.hasClass('popup');
         var isLoginScreen = modal.hasClass('login-screen');
@@ -473,7 +315,10 @@
                 marginTop: - Math.round(modal.outerHeight() / 2) + 'px',
                 marginLeft: - Math.round(modal.outerWidth() / 2) + 'px'
             });
+            // @notice 以免动画导致宽度计算失败
+            modal.addClass('modal-ready');
         }
+
         if (isToast) {
             modal.show();
             modal.css({
@@ -511,6 +356,7 @@
         });
         return true;
     };
+
     $.closeModal = function (modal) {
         modal = $(modal || '.modal-in');
         if (typeof modal !== 'undefined' && modal.length === 0) {
@@ -560,9 +406,6 @@
                     modal.remove();
                 }
             });
-            if (isModal &&  defaults.modalStack ) {
-                $.modalStackClearQueue();
-            }
         }
         else {
             modal.removeClass('modal-in modal-out').trigger('closed').hide();
@@ -572,6 +415,7 @@
         }
         return true;
     };
+
     function handleClicks(e) {
         /*jshint validthis:true */
         var clicked = $(this);
@@ -634,8 +478,6 @@
       popupCloseByOutside: true,
       closePrevious: true  //close all previous modal before open
     };
-
-    // TODO 添加 options 参数，控制点击空白关闭弹窗这些参数
 
     $(function() {
       $(document).on('click', ' .modal-overlay, .popup-overlay, .close-popup, .open-popup, .open-popover, .close-popover, .close-picker', handleClicks);

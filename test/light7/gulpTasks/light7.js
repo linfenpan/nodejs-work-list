@@ -42,8 +42,11 @@ const jsMinLight7 = lazypipe()
 function compressLight7() {
   // light7.js
   gulp.src([
+    `${jsPath}/util.js`,
+    `${jsPath}/device.js`,
     `${jsPath}/zepto-adapter.js`,
     `${jsPath}/modal.js`,
+    `${jsPath}/picker.js`
   ])
   .pipe(concat(`${packnameLight7}.js`))
   .pipe(jsTransformLight7())
