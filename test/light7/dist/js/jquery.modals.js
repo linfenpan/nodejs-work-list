@@ -424,6 +424,28 @@ Device/OS Detection
     var EVENTS = { CONFIRM: 'confirm', CANCEL: 'cancel' };
     var KEY_MODAL_OPTIONS = 'modal-options';
 
+    // 获取弹窗参数
+    function getModalOptions(modal) {
+      var $modal = $(modal);
+      return $.extend({}, defaults, $modal.data(KEY_MODAL_OPTIONS));
+    }
+    // 设置弹窗参数
+    // @param {jQuery} [modal] 弹窗 jquery dom 对象
+    // @param {Object} [opts] 参数，例如: { modalCloseByOutside: false, closePrevious: false }
+    function setModalOptions(modal, opts) {
+      var $modal = $(modal);
+      var defOpts = $modal.data(KEY_MODAL_OPTIONS);
+      $modal.data(KEY_MODAL_OPTIONS, $.extend(defOpts, opts || {}));
+    }
+
+    // 修正位置
+    function fixPosition($modal) {
+      $modal.css({
+        marginTop: - Math.round($modal.outerHeight() / 2) + 'px',
+        marginLeft: - Math.round($modal.outerWidth() / 2) + 'px'
+      });
+    }
+
     $.modal = function (params) {
         params = params || {};
         var modalHTML = '';
@@ -450,17 +472,16 @@ Device/OS Detection
         // Add events on buttons
         modal.find('.modal-button').each(function (index, el) {
           $(el).on('click', function (e) {
-            if (params.buttons[index].close !== false) $.closeModal(modal);
             if (params.buttons[index].onClick) params.buttons[index].onClick(modal, e);
             if (params.buttons[index].event) modal.trigger(params.buttons[index].event, [modal]);
             if (params.onClick) params.onClick(modal, index);
+            if (params.buttons[index].close !== false) $.closeModal(modal);
           });
         });
 
-        // 给 modal 额外方法，用于设置参数，用法: $.modal(dom).options({ closeEvent: 'confirm' }) 之类的
+        // 给 modal 额外方法，用于设置参数，用法: $.modal(dom).options({ closePrevious: true }) 之类的
         modal.options = function(opts) {
-          var defOpts = this.data(KEY_MODAL_OPTIONS);
-          this.data(KEY_MODAL_OPTIONS, $.extend(defOpts, opts || {}));
+          setModalOptions(this, opts);
           return this;
         };
 
@@ -477,11 +498,25 @@ Device/OS Detection
           callbackOk = arguments[1];
           title = undefined;
         }
-        return $.modal({
+        var modal = $.modal({
           text: text || '',
           title: typeof title === 'undefined' ? defaults.modalTitle : title,
-          buttons: [ {text: defaults.modalButtonOk, bold: true, event: EVENTS.CONFIRM, onClick: callbackOk} ]
+          buttons: [
+            { text: defaults.modalButtonOk, bold: true, event: EVENTS.CONFIRM, onClick: callbackOk }
+          ]
         });
+
+        var closeEvent = defaults.closeEvent;
+        modal.options({ closeAsConfirm: true })
+          .one(EVENTS.CONFIRM, function() {
+            modal.off(closeEvent);
+          })
+          .one(closeEvent, function() {
+            var options = getModalOptions(modal);
+            options.closeAsConfirm && modal.trigger(EVENTS.CONFIRM, [modal]);
+          });
+
+        return modal;
     };
 
     $.confirm = function (text, title, callbackOk, callbackCancel) {
@@ -490,7 +525,7 @@ Device/OS Detection
           callbackOk = arguments[1];
           title = undefined;
         }
-        return $.modal({
+        var modal = $.modal({
           text: text || '',
           title: typeof title === 'undefined' ? defaults.modalTitle : title,
           buttons: [
@@ -498,6 +533,21 @@ Device/OS Detection
             {text: defaults.modalButtonOk, bold: true, onClick: callbackOk, event: EVENTS.CONFIRM}
           ]
         });
+
+        var closeEvent = defaults.closeEvent;
+        modal.options({ closeAsCancel: true })
+          .one(EVENTS.CANCEL, function() {
+            modal.off(closeEvent);
+          })
+          .one(EVENTS.CONFIRM, function() {
+            modal.off(closeEvent);
+          })
+          .one(closeEvent, function() {
+            var options = getModalOptions(modal);
+            options.closeAsCancel && modal.trigger(EVENTS.CANCEL, [modal]);
+          });
+
+        return modal;
     };
 
     $.prompt = function (text, title, callbackOk, callbackCancel) {
@@ -654,7 +704,7 @@ Device/OS Detection
         sizePopover();
 
         $(window).on('resize', sizePopover);
-        modal.on('close', function () {
+        modal.on(defaults.closeEvent, function () {
             $(window).off('resize', sizePopover);
         });
 
@@ -684,17 +734,27 @@ Device/OS Detection
         if (modal.find('.' + defaults.viewClass).length > 0) {
             $.sizeNavbars(modal.find('.' + defaults.viewClass)[0]);
         }
-        $.openModal(modal);
 
-        return modal[0];
+        modal.addClass('modal-single');
+        return $.openModal(modal, true);
     };
 
     //显示一个消息，会在2秒钟后自动消失
     $.toast = function(msg, time) {
-      var $toast = $("<div class='modal toast'>"+msg+"</div>").appendTo(document.body);
-      $.openModal($toast);
+      var $toast = $("<div class='toast'>"+msg+"</div>").appendTo(document.body);
+
+      $toast.show();
+      fixPosition($toast);
+
+      //Make sure that styles are applied, trigger relayout;
+      var clientLeft = $toast[0].clientLeft;
+      $toast.addClass('toast-in').transitionEnd(function (e) {
+        $toast.trigger('opened');
+      });
+
       setTimeout(function() {
-        $.closeModal($toast);
+        $toast.trigger(defaults.closeEvent, [$toast]);
+        $toast.addClass('toast-out').transitionEnd(function() { $toast.remove(); });
       }, time || 2000);
     };
 
@@ -715,15 +775,27 @@ Device/OS Detection
         return pickerModal[0];
     };
 
+    $.modalStack = [];
     $.openModal = function (modal) {
-        if(defaults.closePrevious) $.closeModal();
+        var options = getModalOptions(modal);
+
+        if(options.closePrevious) {
+          $.closeModal();
+        } else if (!options.singleModal) {
+          // 不然此弹窗关闭时，应该把上一个弹窗，重新载入
+          var $oldModal = $('.modal-in:not(.modal-out)').filter(':not(.modal-single)');
+          if ($oldModal.length > 0) {
+            $.modalStack.unshift($oldModal);
+            $oldModal.addClass('modal-out');
+          }
+        }
+
         modal = $(modal);
         var isModal = modal.hasClass('modal');
         var isPopover = modal.hasClass('popover');
         var isPopup = modal.hasClass('popup');
         var isLoginScreen = modal.hasClass('login-screen');
         var isPickerModal = modal.hasClass('picker-modal');
-        var isToast = modal.hasClass('toast');
         if (isModal) {
             modal.show();
             modal.css({
@@ -734,20 +806,13 @@ Device/OS Detection
             modal.addClass('modal-ready');
         }
 
-        if (isToast) {
-            modal.show();
-            modal.css({
-                marginLeft: - Math.round(parseInt(window.getComputedStyle(modal[0]).width) / 2)  + 'px' //
-            });
-        }
-
         var overlay;
-        if (!isLoginScreen && !isPickerModal && !isToast) {
+        if (!isLoginScreen && !isPickerModal) {
             if ($('.modal-overlay').length === 0 && !isPopup) {
-                $(defaults.modalContainer).append('<div class="modal-overlay"></div>');
+                $(options.modalContainer).append('<div class="modal-overlay"></div>');
             }
             if ($('.popup-overlay').length === 0 && isPopup) {
-                $(defaults.modalContainer).append('<div class="popup-overlay"></div>');
+                $(options.modalContainer).append('<div class="popup-overlay"></div>');
             }
             overlay = isPopup ? $('.popup-overlay') : $('.modal-overlay');
         }
@@ -760,11 +825,11 @@ Device/OS Detection
 
         // Picker modal body class
         if (isPickerModal) {
-            $(defaults.modalContainer).addClass('with-picker-modal');
+            $(options.modalContainer).addClass('with-picker-modal');
         }
 
         // Classes for transition in
-        if (!isLoginScreen && !isPickerModal && !isToast) overlay.addClass('modal-overlay-visible');
+        if (!isLoginScreen && !isPickerModal) overlay.addClass('modal-overlay-visible');
         modal.removeClass('modal-out').addClass('modal-in').transitionEnd(function (e) {
             if (modal.hasClass('modal-out')) modal.trigger('closed');
             else modal.trigger('opened');
@@ -773,10 +838,13 @@ Device/OS Detection
     };
 
     $.closeModal = function (modal) {
-        modal = $(modal || '.modal-in');
-        if (typeof modal !== 'undefined' && modal.length === 0) {
-            return;
+        modal = $(modal || '.modal-in:not(.modal-out)');
+        var options = getModalOptions(modal);
+
+        if (modal && modal.length === 0) {
+          return;
         }
+
         var isModal = modal.hasClass('modal');
         var isPopover = modal.hasClass('popover');
         var isPopup = modal.hasClass('popup');
@@ -786,6 +854,7 @@ Device/OS Detection
         var removeOnClose = modal.hasClass('remove-on-close');
 
         var overlay = isPopup ? $('.popup-overlay') : $('.modal-overlay');
+
         if (isPopup){
             if (modal.length === $('.popup.modal-in').length) {
                 overlay.removeClass('modal-overlay-visible');
@@ -795,12 +864,12 @@ Device/OS Detection
             overlay.removeClass('modal-overlay-visible');
         }
 
-        modal.trigger('close');
+        modal.trigger(options.closeEvent);
 
         // Picker modal body class
         if (isPickerModal) {
-            $(defaults.modalContainer).removeClass('with-picker-modal');
-            $(defaults.modalContainer).addClass('picker-modal-closing');
+            $(options.modalContainer).removeClass('with-picker-modal');
+            $(options.modalContainer).addClass('picker-modal-closing');
         }
 
         if (!isPopover) {
@@ -809,7 +878,7 @@ Device/OS Detection
                 else modal.trigger('opened');
 
                 if (isPickerModal) {
-                    $(defaults.modalContainer).removeClass('picker-modal-closing');
+                    $(options.modalContainer).removeClass('picker-modal-closing');
                 }
                 if (isPopup || isLoginScreen || isPickerModal) {
                     modal.removeClass('modal-out').hide();
@@ -828,6 +897,11 @@ Device/OS Detection
                 modal.remove();
             }
         }
+
+        if ($.modalStack.length > 0) {
+          $.openModal($.modalStack.shift());
+        }
+
         return true;
     };
 
@@ -849,8 +923,9 @@ Device/OS Detection
             $.popover(popover, clicked);
         }
         if (clicked.hasClass('close-popover')) {
-            $.closeModal('.popover.modal-in');
+            $.closeModal('.popover.modal-in:not(.modal-out)');
         }
+
         // Popup
         var popup;
         if (clicked.hasClass('open-popup')) {
@@ -864,22 +939,29 @@ Device/OS Detection
             if (clickedData.popup) {
                 popup = clickedData.popup;
             }
-            else popup = '.popup.modal-in';
+            else popup = '.popup.modal-in:not(.modal-out)';
             $.closeModal(popup);
         }
 
         // Close Modal
         if (clicked.hasClass('modal-overlay')) {
-            if ($('.modal.modal-in').length > 0 && defaults.modalCloseByOutside)
-                $.closeModal('.modal.modal-in');
-            if ($('.actions-modal.modal-in').length > 0 && defaults.actionsCloseByOutside)
-                $.closeModal('.actions-modal.modal-in');
+          var $modal = $('.modal.modal-in:not(.modal-out)');
+          if ($modal.length > 0) {
+            var options = getModalOptions($modal);
+            options.modalCloseByOutside && $.closeModal($modal);
+          }
 
-            if ($('.popover.modal-in').length > 0) $.closeModal('.popover.modal-in');
+          var $popover = $('.popover.modal-in:not(.modal-out)');
+          if ($popover.length > 0) {
+            $.closeModal($popover);
+          }
         }
         if (clicked.hasClass('popup-overlay')) {
-            if ($('.popup.modal-in').length > 0 && defaults.popupCloseByOutside)
-                $.closeModal('.popup.modal-in');
+          var $popup = $('.popup.modal-in:not(.modal-out)');
+          if ($popup.length > 0) {
+            var options = getModalOptions($popup);
+            options.popupCloseByOutside && $.closeModal($popup);
+          }
         }
     }
 
@@ -891,7 +973,8 @@ Device/OS Detection
       modalCloseByOutside: true,
       actionsCloseByOutside: false,
       popupCloseByOutside: true,
-      closePrevious: true  //close all previous modal before open
+      closePrevious: false,  //close all previous modal before open
+      closeEvent: 'close'
     };
 
     $(function() {
