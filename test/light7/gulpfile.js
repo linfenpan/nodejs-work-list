@@ -24,7 +24,10 @@ const path = require('path');
 
 const babel = require('gulp-babel');
 const concat = require("gulp-concat");
+const rename = require("gulp-rename");
+const uglify = require("gulp-uglify");
 const less = require('gulp-less');
+const cssmin = require('gulp-cssmin');
 const autoprefixer = require('gulp-autoprefixer');
 
 gulp.task('default', () => {
@@ -33,22 +36,31 @@ gulp.task('default', () => {
     // 下面这堆，都是 picker.js 依赖的
     'src/mobile/util.js', 'src/mobile/device.js', 'src/mobile/zepto-adapter.js', 'src/mobile/picker-modal.js', 'src/mobile/picker.js'
   ];
-  gulp.watch(scripts, () => {
+  // gulp.watch(scripts, () => {
     console.log('编译　脚本');
     gulp.src(scripts)
-      .pipe(concat('jquery-modal2.js'))
+      .pipe(concat('jquery-modal.js'))
       .pipe(babel({
           presets: ['es2015']
       }))
+      .pipe(gulp.dest('dest'))
+      .pipe(uglify({
+          compress: {
+              warnings: false
+          },
+          mangle: true,
+          preserveComments: false
+      }))
+      .pipe(rename({ suffix: '.min' }))
       .pipe(gulp.dest('dest'));
-  });
+  // });
 
   const styles = [
     'src/style.less',
     // 下面这堆，都是 picker.js 依赖的
     'src/mobile/picker.less'
   ];
-  gulp.watch(styles, () => {
+  // gulp.watch(styles, () => {
     console.log('编译　less');
     gulp.src(styles)
       .pipe(concat('jquery-modal.css'))
@@ -64,6 +76,9 @@ gulp.task('default', () => {
       .pipe(autoprefixer({
         browsers: [ 'Android >= 2', 'Chrome >= 20', 'Firefox >= 24', 'Explorer >= 9', 'iOS >= 6', 'Opera >= 12', 'Safari >= 6' ]
       }))
+      .pipe(gulp.dest('dest'))
+      .pipe(cssmin())
+      .pipe(rename({ suffix: '.min' }))
       .pipe(gulp.dest('dest'));
-  });
+  // });
 });
