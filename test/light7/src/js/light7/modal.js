@@ -316,9 +316,11 @@
         modal = $(modal);
         if (modal.length === 0) return false;
         modal.show();
-        if (modal.find('.' + defaults.viewClass).length > 0) {
-            $.sizeNavbars(modal.find('.' + defaults.viewClass)[0]);
-        }
+        // if (modal.find('.' + defaults.viewClass).length > 0) {
+        //     $.sizeNavbars(modal.find('.' + defaults.viewClass)[0]);
+        // }
+
+        // TODO 这里应该独立弹窗!!!!!!!!!
 
         modal.addClass('modal-single');
         return $.openModal(modal, true);
@@ -558,7 +560,7 @@
       modalCloseByOutside: true,
       actionsCloseByOutside: false,
       popupCloseByOutside: true,
-      closePrevious: false,  //close all previous modal before open
+      closePrevious: true,  //close all previous modal before open
       closeEvent: 'close'
     };
 

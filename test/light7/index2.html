@@ -5,22 +5,17 @@
   <title>light7解包</title>
   <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
   <!-- <link href="./jquery.modals.css" rel="stylesheet" /> -->
-  <link href="./dist/css/jquery.modals.css" rel="stylesheet" />
+  <link href="./dest/jquery-modal.css" rel="stylesheet" />
   <script src="./jquery.min.js"></script>
-  <script src="./dist/js/jquery.modals.js"></script>
+  <script src="./dest/jquery-modal2.js"></script>
   <style>
     * { padding: 0; margin: 0; }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="content">
-        <div class="content-block">
-          <p><a href="#" class="open-popup open-about" data-popup=".popup-about">Open About Popup </a></p>
-          <p><a href="#" class="open-popup open-services" data-popup=".popup-services">Open Services Popup </a></p>
-        </div>
-    </div>
-  </div>
+  <p><a href="#" class="open-popup open-about" data-popup=".popup-about">Open About Popup </a></p>
+  <p><a href="#" class="open-popup open-services" data-popup=".popup-services">Open Services Popup </a></p>
+
   <!-- About Popup -->
   <div class="popup popup-about">
     <div class="content-block">
@@ -40,7 +35,6 @@
 
   <input type="text" id='picker'/>
   <script>
-
   $("#picker").picker({
     toolbarTemplate: '<header class="bar bar-nav">\
     <button class="button button-link pull-right close-picker">确定</button>\
@@ -62,6 +56,16 @@
       }
     ]
   });
+    // setTimeout(function() {
+    //   var modal = new Modal({
+    //     title: '测试',
+    //     content: '内容，是非常长的啊啊~~~',
+    //     buttons: [
+    //       { text: '测试', event: 'close' }
+    //     ]
+    //   });
+    //   modal.show();
+    // }, 1000);
   </script>
 </body>
 </html>
