@@ -5,13 +5,13 @@
   <div class="main">
     <ul class="workList">
       <li>
-        <div class="text">[梦幻]短信还价系统</div>
+        <div class="text">[测试]短信还价系统</div>
         <div class="opers">
           <a href="javascript:;" class="">查看</a>
         </div>
       </li>
       <li>
-        <div class="text">[梦幻]短信还价系统</div>
+        <div class="text">[测试]短信还价系统</div>
         <div class="opers">
           <a href="javascript:;" class="">查看</a>
         </div>
